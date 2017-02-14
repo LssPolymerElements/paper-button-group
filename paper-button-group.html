@@ -20,113 +20,136 @@ See <a href="paper-button">paper-button</a> for more
 information about `paper-button`.
 
 @element paper-button-group
-@demo http://protoss78.github.io/paper-button-group
+@demo https://github.com/LssPolymerElements/paper-button-group
 -->
 <dom-module name="paper-button-group">
     <style>
-    :host {
-        display: inline-block;
-    }
+         :host {
+            display: inline-block;
+        }
+        
+        label {
+            @apply(--paper-font-caption);
+            color: var(--secondary-text-color);
+        }
+        
+        .button-container {
+            padding-top: 8px;
+        }
     </style>
     <template>
-        <content id="items" select="*"></content>
+        <template is="dom-if" if="[[label]]">
+            <label>[[label]]</label>
+        </template>
+        <div id="buttonContainer" class="button-container">
+            <content id="items" select="*"></content>
+        </div>
     </template>
 </dom-module>
 <script>
-Polymer({
-    is: 'paper-button-group',
+    Polymer({
+        is: 'paper-button-group',
 
-    behaviors: [
-        Polymer.IronA11yKeysBehavior,
-        Polymer.IronSelectableBehavior
-    ],
+        behaviors: [
+            Polymer.IronA11yKeysBehavior,
+            Polymer.IronSelectableBehavior
+        ],
 
-    hostAttributes: {
-        role: 'buttongroup',
-        tabindex: 0
-    },
-
-    properties: {
-        /**
-         * Overriden from Polymer.IronSelectableBehavior
-         */
-        attrForSelected: {
-            type: String,
-            value: 'name'
+        hostAttributes: {
+            role: 'buttongroup',
+            tabindex: 0
         },
 
-        /**
-         * Overriden from Polymer.IronSelectableBehavior
-         */
-        selectedAttribute: {
-            type: String,
-            value: 'active'
+        properties: {
+            /**
+             * Overriden from Polymer.IronSelectableBehavior
+             */
+            attrForSelected: {
+                type: String,
+                value: 'name'
+            },
+
+            /**
+             * Overriden from Polymer.IronSelectableBehavior
+             */
+            selectedAttribute: {
+                type: String,
+                value: 'active'
+            },
+
+            /**
+             * Overriden from Polymer.IronSelectableBehavior
+             */
+            selectable: {
+                type: String,
+                value: 'paper-button'
+            },
+
+            label: {
+                type: String
+            }
+        },
+        keyBindings: {
+            'left up': 'selectPrevious',
+            'right down': 'selectNext',
         },
 
+        listeners: {
+            'focus': '_focused'
+        },
+        _focused: function (value) {
+            console.log(value);
+        },
         /**
-         * Overriden from Polymer.IronSelectableBehavior
+         * Selects the given value.
          */
-        selectable: {
-            type: String,
-            value: 'paper-button'
-        }
-    },
+        select: function (value) {
+            if (this.selected) {
+                var oldItem = this._valueToItem(this.selected);
+                oldItem.toggles = true;
 
-    keyBindings: {
-        'left up': 'selectPrevious',
-        'right down': 'selectNext',
-    },
+                // Do not allow unchecking the selected item.
+                if (this.selected == value) {
+                    oldItem.active = true;
+                    return;
+                }
 
-    /**
-     * Selects the given value.
-     */
-    select: function(value) {
-        if (this.selected) {
-            var oldItem = this._valueToItem(this.selected);
-            oldItem.toggles = true;
-
-            // Do not allow unchecking the selected item.
-            if (this.selected == value) {
-                oldItem.active = true;
-                return;
+                if (oldItem)
+                    oldItem.active = false;
             }
 
-            if (oldItem)
-                oldItem.active = false;
-        }
+            Polymer.IronSelectableBehavior.select.apply(this, [value]);
+            this.fire('paper-button-group-changed');
+        },
 
-        Polymer.IronSelectableBehavior.select.apply(this, [value]);
-        this.fire('paper-button-group-changed');
-    },
+        /**
+         * Selects the previous item. If the previous item is disabled, then it is
+         * skipped, and its previous item is selected
+         */
+        selectPrevious: function () {
+            var length = this.items.length;
+            var newIndex = Number(this._valueToIndex(this.selected));
 
-    /**
-     * Selects the previous item. If the previous item is disabled, then it is
-     * skipped, and its previous item is selected
-     */
-    selectPrevious: function() {
-        var length = this.items.length;
-        var newIndex = Number(this._valueToIndex(this.selected));
+            do {
+                newIndex = (newIndex - 1 + length) % length;
+            } while (this.items[newIndex].disabled)
 
-        do {
-            newIndex = (newIndex - 1 + length) % length;
-        } while (this.items[newIndex].disabled)
+            this.select(this._indexToValue(newIndex));
+        },
 
-        this.select(this._indexToValue(newIndex));
-    },
+        /**
+         * Selects the next item. If the next item is disabled, then it is
+         * skipped, and the next item after it is selected.
+         */
+        selectNext: function () {
+            var length = this.items.length;
+            var newIndex = Number(this._valueToIndex(this.selected));
 
-    /**
-     * Selects the next item. If the next item is disabled, then it is
-     * skipped, and the next item after it is selected.
-     */
-    selectNext: function() {
-        var length = this.items.length;
-        var newIndex = Number(this._valueToIndex(this.selected));
+            do {
+                newIndex = (newIndex + 1 + length) % length;
+            } while (this.items[newIndex].disabled)
 
-        do {
-            newIndex = (newIndex + 1 + length) % length;
-        } while (this.items[newIndex].disabled)
-
-        this.select(this._indexToValue(newIndex));
-    },
-});
+            this.select(this._indexToValue(newIndex));
+        },
+    });
 </script>
