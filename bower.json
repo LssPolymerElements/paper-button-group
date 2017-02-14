@@ -1,6 +1,6 @@
 {
   "name": "lss-paper-button-group",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "keywords": [
     "polymer",
     "web-components",
@@ -9,7 +9,7 @@
   "authors": [
     "Roman Kaufmann <roman.kaufmann.at@gmail.com>"
   ],
-  "main": "paper-button-group.html",
+  "main": "lss-paper-button-group.html",
   "description": "Paper Button Group element (based on paper-radio-group)",
   "license": "MIT",
   "ignore": [
